@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Budget Overview</h2>
+<p>Total budget amounts for different departments or projects.</p>
+<table>
+    <tr><th>Department/Project</th><th>Allocated Budget</th></tr>
+    {% for budget in budgets %}
+    <tr><td>{{ budget['department'] }}</td><td>${{ budget['allocated'] }}</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

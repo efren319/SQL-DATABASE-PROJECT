@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>User Feedback</h2>
+<p>Leave comments or questions about the portal.</p>
+<form method="POST" id="feedback-form">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    <label for="comment">Comment:</label>
+    <textarea id="comment" name="comment" required></textarea>
+    <button type="submit">Submit</button>
+</form>
+<h3>Previous Feedback</h3>
+<ul id="feedback-list">
+    {% for fb in feedback_data %}
+    <li><strong>{{ fb['name'] }}:</strong> {{ fb['comment'] }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

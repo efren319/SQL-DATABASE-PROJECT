@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Project List</h2>
+<p>List of government projects with status and budget info.</p>
+<table>
+    <tr><th>Project Name</th><th>Status</th><th>Budget</th></tr>
+    {% for project in projects_data %}
+    <tr><td>{{ project['name'] }}</td><td>{{ project['status'] }}</td><td>${{ project['budget'] }}</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

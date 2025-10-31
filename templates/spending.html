@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Spending Tracker</h2>
+<p>How much money has been spent vs. allocated.</p>
+<table>
+    <tr><th>Department/Project</th><th>Allocated</th><th>Spent</th><th>Remaining</th></tr>
+    {% for budget in budgets %}
+    <tr>
+        <td>{{ budget['department'] }}</td>
+        <td>${{ budget['allocated'] }}</td>
+        <td>${{ budget['spent'] }}</td>
+        <td>${{ budget['allocated'] - budget['spent'] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

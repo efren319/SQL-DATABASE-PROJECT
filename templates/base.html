@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GovFunds Transparency Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>GovFunds Transparency Portal</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/budget">Budget Overview</a>
+        <a href="/spending">Spending Tracker</a>
+        <a href="/projects">Project List</a>
+        <a href="/feedback">User Feedback</a>
+        <a href="/upload">Data Upload (Admin)</a>
+    </nav>
+    {% block content %}{% endblock %}
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
