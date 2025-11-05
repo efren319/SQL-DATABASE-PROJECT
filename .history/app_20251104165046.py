@@ -1,5 +1,4 @@
 import sqlite3
-import os
 from flask import Flask, render_template, request, redirect, url_for, g
 
 app = Flask(__name__)
@@ -24,7 +23,7 @@ def close_connection(exception):
 def init_db():
     with app.app_context():
         db = get_db()
-        with open('create_database.sql', 'r') as f:
+        with open('SQLcreate_database.sql', 'r') as f:
             sql_script = f.read()
         db.executescript(sql_script)  # Execute the entire SQL script
         db.commit()
@@ -86,5 +85,4 @@ def upload():
 
 if __name__ == '__main__':
     init_db()  # Load and execute the SQL file
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=True)
