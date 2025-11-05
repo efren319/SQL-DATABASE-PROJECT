@@ -59,16 +59,19 @@ def projects():
 
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
+    db = get_db()
+    cursor = db.cursor()
     if request.method == 'POST':
         name = request.form.get('name')
         comment = request.form.get('comment')
         if name and comment:
-            db = get_db()
-            db.execute('INSERT INTO feedback (name, comment) VALUES (?, ?)', (name, comment))
+            cursor.execute('INSERT INTO feedback (name, comment) VALUES (%s, %s)', (name, comment))
             db.commit()
+        cursor.close()
         return redirect(url_for('feedback'))
-    db = get_db()
-    feedback_data = db.execute('SELECT * FROM feedback').fetchall()
+    cursor.execute('SELECT * FROM feedback')
+    feedback_data = cursor.fetchall()
+    cursor.close()
     return render_template('feedback.html', feedback_data=feedback_data)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -78,15 +81,17 @@ def upload():
         allocated = float(request.form.get('allocated', 0))
         spent = float(request.form.get('spent', 0))
         db = get_db()
-        db.execute('UPDATE budget SET allocated = ?, spent = ? WHERE department = ?', (allocated, spent, dept))
+        cursor = db.cursor()
+        cursor.execute('UPDATE budget SET allocated = %s, spent = %s WHERE department = %s', (allocated, spent, dept))
         db.commit()
         
         proj_name = request.form.get('project_name')
         proj_status = request.form.get('project_status')
         proj_budget = float(request.form.get('project_budget', 0))
         if proj_name:
-            db.execute('INSERT INTO projects (name, status, budget) VALUES (?, ?, ?)', (proj_name, proj_status, proj_budget))
+            cursor.execute('INSERT INTO projects (name, status, budget) VALUES (%s, %s, %s)', (proj_name, proj_status, proj_budget))
             db.commit()
+        cursor.close()
         return redirect(url_for('home'))
     return render_template('upload.html')
 

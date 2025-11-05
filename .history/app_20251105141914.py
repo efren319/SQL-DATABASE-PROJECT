@@ -12,8 +12,7 @@ DATABASE = os.environ.get('DATABASE_PATH', 'govfunds.db')
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = sqlite3.Row  # For dict-like access
+        db = g._database = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return db
 
 # Close DB on app teardown
@@ -30,8 +29,10 @@ def init_db():
             db = get_db()
             with open('create_database.sql', 'r') as f:
                 sql_script = f.read()
-            db.executescript(sql_script)  # Execute the entire SQL script
+            cursor = db.cursor()
+            cursor.execute(sql_script)
             db.commit()
+            cursor.close()
     except Exception as e:
         print(f"Database initialization error (this is normal if already initialized): {e}")
 
@@ -42,33 +43,45 @@ def home():
 @app.route('/budget')
 def budget():
     db = get_db()
-    budgets = db.execute('SELECT * FROM budget').fetchall()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM budget')
+    budgets = cursor.fetchall()
+    cursor.close()
     return render_template('budget.html', budgets=budgets)
 
 @app.route('/spending')
 def spending():
     db = get_db()
-    budgets = db.execute('SELECT * FROM budget').fetchall()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM budget')
+    budgets = cursor.fetchall()
+    cursor.close()
     return render_template('spending.html', budgets=budgets)
 
 @app.route('/projects')
 def projects():
     db = get_db()
-    projects_data = db.execute('SELECT * FROM projects').fetchall()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM projects')
+    projects_data = cursor.fetchall()
+    cursor.close()
     return render_template('projects.html', projects_data=projects_data)
 
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
+    db = get_db()
+    cursor = db.cursor()
     if request.method == 'POST':
         name = request.form.get('name')
         comment = request.form.get('comment')
         if name and comment:
-            db = get_db()
-            db.execute('INSERT INTO feedback (name, comment) VALUES (?, ?)', (name, comment))
+            cursor.execute('INSERT INTO feedback (name, comment) VALUES (%s, %s)', (name, comment))
             db.commit()
+        cursor.close()
         return redirect(url_for('feedback'))
-    db = get_db()
-    feedback_data = db.execute('SELECT * FROM feedback').fetchall()
+    cursor.execute('SELECT * FROM feedback')
+    feedback_data = cursor.fetchall()
+    cursor.close()
     return render_template('feedback.html', feedback_data=feedback_data)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -78,15 +91,17 @@ def upload():
         allocated = float(request.form.get('allocated', 0))
         spent = float(request.form.get('spent', 0))
         db = get_db()
-        db.execute('UPDATE budget SET allocated = ?, spent = ? WHERE department = ?', (allocated, spent, dept))
+        cursor = db.cursor()
+        cursor.execute('UPDATE budget SET allocated = %s, spent = %s WHERE department = %s', (allocated, spent, dept))
         db.commit()
         
         proj_name = request.form.get('project_name')
         proj_status = request.form.get('project_status')
         proj_budget = float(request.form.get('project_budget', 0))
         if proj_name:
-            db.execute('INSERT INTO projects (name, status, budget) VALUES (?, ?, ?)', (proj_name, proj_status, proj_budget))
+            cursor.execute('INSERT INTO projects (name, status, budget) VALUES (%s, %s, %s)', (proj_name, proj_status, proj_budget))
             db.commit()
+        cursor.close()
         return redirect(url_for('home'))
     return render_template('upload.html')
 
